@@ -1,0 +1,9 @@
+database.db
+__pycache__
+venv
+/backend/__pycache__
+screenshots/
+.Dockerfile
+.dockerignore
+.gitignore
+.git
