@@ -11,6 +11,45 @@
     --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
 }
 
+/* Language Switcher */
+.lang-switcher {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 1000;
+}
+
+/* RTL positioning for switcher */
+html[dir="rtl"] .lang-switcher {
+    right: auto;
+    left: 1rem;
+}
+
+.lang-btn {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-muted);
+}
+
+.lang-btn:hover {
+    background: white;
+    color: var(--primary);
+}
+
+.lang-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     margin: 0;
@@ -46,6 +85,7 @@ h1 {
     margin-bottom: 0.5rem;
     background: linear-gradient(to right, #4f46e5, #9333ea);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -75,7 +115,8 @@ label {
     color: var(--text-main);
 }
 
-input[type="text"], textarea {
+input[type="text"],
+textarea {
     width: 100%;
     padding: 0.75rem 1rem;
     border: 2px solid #e5e7eb;
@@ -87,7 +128,8 @@ input[type="text"], textarea {
     font-family: inherit;
 }
 
-input[type="text"]:focus, textarea:focus {
+input[type="text"]:focus,
+textarea:focus {
     outline: none;
     border-color: var(--primary);
 }
@@ -150,10 +192,10 @@ input[type="text"]:focus, textarea:focus {
     font-weight: 500;
     color: var(--text-muted);
     transition: all 0.2s;
-    background: rgba(255,255,255,0.5);
+    background: rgba(255, 255, 255, 0.5);
 }
 
-.time-option input:checked + .time-card {
+.time-option input:checked+.time-card {
     border-color: var(--primary);
     color: var(--primary);
     background: rgba(79, 70, 229, 0.05);
@@ -226,7 +268,7 @@ input[type="text"]:focus, textarea:focus {
     padding: 1rem;
     border-radius: 8px;
     border-left: 4px solid var(--primary);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .message-meta {
@@ -255,7 +297,7 @@ input[type="text"]:focus, textarea:focus {
     margin-bottom: 1.5rem;
     font-size: 0.9rem;
     color: var(--text-muted);
-    background: rgba(0,0,0,0.03);
+    background: rgba(0, 0, 0, 0.03);
     padding: 0.5rem;
     border-radius: 20px;
     display: inline-block;
@@ -272,7 +314,7 @@ input[type="text"]:focus, textarea:focus {
     color: white;
     padding: 0.75rem 1.5rem;
     border-radius: 50px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     opacity: 0;
     transition: all 0.3s ease;
     z-index: 1000;
@@ -287,11 +329,11 @@ input[type="text"]:focus, textarea:focus {
     .container {
         padding: 1rem;
     }
-    
+
     .card {
         padding: 1.5rem;
     }
-    
+
     h1 {
         font-size: 1.5rem;
     }

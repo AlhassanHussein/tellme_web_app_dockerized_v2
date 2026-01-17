@@ -15,18 +15,20 @@
 
 <body>
     <div class="container">
-        <div class="loader" id="loader" style="text-align: center;">Loading...</div>
+        <div class="loader" id="loader" style="text-align: center;" data-i18n="private.loading">Loading...</div>
 
         <div class="card" id="content" style="display: none;">
             <div id="expirationTimer" class="timer-badge">...</div>
 
-            <h1>Inbox</h1>
-            <p class="subtitle">Messages for <strong id="userName">...</strong></p>
+            <h1 data-i18n="private.inbox_title">Inbox</h1>
+            <p class="subtitle"><span data-i18n="private.subtitle_prefix">Messages for</span> <strong
+                    id="userName">...</strong></p>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <span class="link-label" id="messageCount">0 Messages</span>
                 <button onclick="loadMessages()" class="btn btn-secondary"
-                    style="width: auto; padding: 0.5rem 1rem; font-size: 0.8rem;">Refresh</button>
+                    style="width: auto; padding: 0.5rem 1rem; font-size: 0.8rem;"
+                    data-i18n="private.refresh">Refresh</button>
             </div>
 
             <div id="messageList" class="message-list">
@@ -36,6 +38,7 @@
         </div>
     </div>
 
+    <script src="/static/i18n.js"></script>
     <script src="/static/app.js"></script>
     <script>
         const pathParts = window.location.pathname.split('/');
@@ -43,20 +46,21 @@
 
         async function loadMessages() {
             const list = document.getElementById('messageList');
-            // Don't clear list immediately to avoid flicker if just refreshing
 
             try {
                 const response = await fetch(`${API_BASE}/private/${privateId}`);
                 if (response.status === 404 || response.status === 410) {
+                    // Translate this too
                     document.body.innerHTML = `
                         <div class="container">
                             <div class="card" style="text-align: center;">
-                                <h1>Link Expired</h1>
-                                <p class="subtitle">This session is no longer active.</p>
-                                <a href="/" class="btn">Go Home</a>
+                                <h1 data-i18n="public.link_expired">Link Expired</h1>
+                                <p class="subtitle" data-i18n="public.session_inactive">This session is no longer active.</p>
+                                <a href="/" class="btn" data-i18n="public.go_home">Go Home</a>
                             </div>
                         </div>
                     `;
+                    if (window.initLanguage) window.initLanguage();
                     return;
                 }
 
@@ -66,35 +70,46 @@
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
 
-                // Initialize timer if not already running
                 if (!window.timerInited) {
                     updateCountdown(data.expires_at, 'expirationTimer');
                     window.timerInited = true;
                 }
 
                 const messages = data.messages.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                document.getElementById('messageCount').textContent = `${messages.length} Message${messages.length !== 1 ? 's' : ''}`;
+
+                // Translate Message count
+                const lang = localStorage.getItem('appLang') || 'en';
+                const countText = window.translations ? window.translations[lang]['private.messages_count'] : "Messages";
+                document.getElementById('messageCount').textContent = `${messages.length} ${countText}`;
 
                 if (messages.length === 0) {
-                    list.innerHTML = `<div class="empty-state">No messages yet... share your public link!</div>`;
+                    const emptyText = window.translations ? window.translations[lang]['private.empty_state'] : "No messages yet... share your public link!";
+                    list.innerHTML = `<div class="empty-state" data-i18n="private.empty_state">${emptyText}</div>`;
                     return;
                 }
 
-                list.innerHTML = messages.map(msg => `
+                list.innerHTML = messages.map(msg => {
+                    const anon = window.translations ? window.translations[lang]['private.anonymous'] : "Anonymous";
+                    return `
                     <div class="message-item">
                         <div class="message-meta">
-                            <span>Anonymous</span>
+                            <span>${anon}</span>
                             <span>${formatDate(msg.created_at)}</span>
                         </div>
                         <div class="message-content">${msg.content}</div>
                     </div>
-                `).join('');
+                `}).join('');
 
             } catch (err) {
                 console.error(err);
                 showToast("Error loading messages");
             }
         }
+
+        // Listen for language changes to reload messages/UI without refresh
+        window.addEventListener('languageChanged', () => {
+            loadMessages();
+        });
 
         loadMessages();
 

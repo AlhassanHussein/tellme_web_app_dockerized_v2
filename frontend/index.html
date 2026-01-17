@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,22 +8,25 @@
     <link rel="stylesheet" href="/static/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <div class="container">
         <div class="card">
-            <h1>TellMe</h1>
-            <p class="subtitle">Create a temporary link to receive anonymous messages.</p>
-            
+            <h1 data-i18n="home.title">TellMe</h1>
+            <p class="subtitle" data-i18n="home.subtitle">Create a temporary link to receive anonymous messages.</p>
+
             <form id="generateForm">
                 <div class="form-group">
-                    <label for="name">Your Name (Optional)</label>
-                    <input type="text" id="name" placeholder="e.g. John Doe">
+                    <label for="name" data-i18n="home.name_label">Your Name (Optional)</label>
+                    <input type="text" id="name" data-i18n-placeholder="home.name_placeholder"
+                        placeholder="e.g. John Doe">
                 </div>
-                
+
                 <div class="form-group">
-                    <label>Duration</label>
+                    <label data-i18n="home.duration_label">Duration</label>
                     <div class="time-selector">
                         <label class="time-option">
                             <input type="radio" name="duration" value="6" checked>
@@ -38,51 +42,58 @@
                         </label>
                     </div>
                 </div>
-                
-                <button type="submit" class="btn" id="generateBtn">Generate Links</button>
+
+                <button type="submit" class="btn" id="generateBtn" data-i18n="home.generate_btn">Generate Links</button>
             </form>
-            
+
             <div id="result" style="display: none; margin-top: 2rem;">
-                <h2>Your Links are Ready!</h2>
-                
+                <h2 data-i18n="home.result_title">Your Links are Ready!</h2>
+
                 <div class="link-box">
-                    <span class="link-label">Public Link (Share this)</span>
+                    <span class="link-label" data-i18n="home.public_label">Public Link (Share this)</span>
                     <div class="link-content">
                         <div class="link-url" id="publicLink"></div>
-                        <button class="copy-btn" onclick="copyToClipboard(document.getElementById('publicLink').textContent, this)">Copy</button>
+                        <button class="copy-btn"
+                            onclick="copyToClipboard(document.getElementById('publicLink').textContent, this)"
+                            data-i18n="home.copy">Copy</button>
                     </div>
                 </div>
-                
+
                 <div class="link-box">
-                    <span class="link-label">Private Inbox Link (Keep secret)</span>
+                    <span class="link-label" data-i18n="home.private_label">Private Inbox Link (Keep secret)</span>
                     <div class="link-content">
                         <div class="link-url" id="privateLink"></div>
-                        <button class="copy-btn" onclick="copyToClipboard(document.getElementById('privateLink').textContent, this)">Copy</button>
+                        <button class="copy-btn"
+                            onclick="copyToClipboard(document.getElementById('privateLink').textContent, this)"
+                            data-i18n="home.copy">Copy</button>
                     </div>
                 </div>
-                
-                <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem;">
+
+                <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem;"
+                    data-i18n="home.expiration_text">
                     These links will expire in <span id="durationText"></span>.
                 </p>
-                
-                <a href="#" id="viewInboxBtn" class="btn btn-secondary" style="margin-top: 1rem;">View Inbox Now</a>
+
+                <a href="#" id="viewInboxBtn" class="btn btn-secondary" style="margin-top: 1rem;"
+                    data-i18n="home.view_inbox">View Inbox Now</a>
             </div>
         </div>
     </div>
 
+    <script src="/static/i18n.js"></script>
     <script src="/static/app.js"></script>
     <script>
         document.getElementById('generateForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const btn = document.getElementById('generateBtn');
             const originalBtnText = btn.textContent;
             btn.textContent = 'Generating...';
             btn.disabled = true;
-            
+
             const name = document.getElementById('name').value;
             const duration = document.querySelector('input[name="duration"]:checked').value;
-            
+
             try {
                 const response = await fetch(`${API_BASE}/generate`, {
                     method: 'POST',
@@ -94,21 +105,21 @@
                         duration_hours: parseInt(duration)
                     })
                 });
-                
+
                 if (!response.ok) throw new Error('Failed to generate');
-                
+
                 const data = await response.json();
-                
+
                 // Show result
                 document.getElementById('generateForm').style.display = 'none';
                 document.getElementById('result').style.display = 'block';
-                
+
                 const origin = window.location.origin;
                 document.getElementById('publicLink').textContent = `${origin}/p/${data.public_id}`;
                 document.getElementById('privateLink').textContent = `${origin}/r/${data.private_id}`;
                 document.getElementById('durationText').textContent = `${duration} hours`;
                 document.getElementById('viewInboxBtn').href = `/r/${data.private_id}`;
-                
+
             } catch (err) {
                 console.error(err);
                 showToast("Something went wrong. Please try again.");
@@ -118,4 +129,5 @@
         });
     </script>
 </body>
+
 </html>

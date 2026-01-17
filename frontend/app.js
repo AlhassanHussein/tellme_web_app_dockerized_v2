@@ -56,7 +56,9 @@ function updateCountdown(expiresAtStr, elementId) {
         const distance = expiresAt - now;
 
         if (distance < 0) {
-            element.innerHTML = "Expired";
+            const lang = window.localStorage.getItem('appLang') || 'en';
+            const expiredText = window.translations ? (window.translations[lang]['public.link_expired'] || "Expired") : "Expired";
+            element.innerHTML = expiredText;
             showToast("Session expired");
             setTimeout(() => window.location.href = '/', 2000);
             return;
@@ -66,7 +68,10 @@ function updateCountdown(expiresAtStr, elementId) {
         const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-        element.innerHTML = `Expires in: <strong>${hours}h ${minutes}m ${seconds}s</strong>`;
+        const lang = window.localStorage.getItem('appLang') || 'en';
+        const label = window.translations ? (window.translations[lang]['private.expires_in'] || "Expires in:") : "Expires in:";
+
+        element.innerHTML = `${label} <strong>${hours}h ${minutes}m ${seconds}s</strong>`;
     }
 
     update();

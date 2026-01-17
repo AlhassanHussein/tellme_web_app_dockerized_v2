@@ -14,38 +14,41 @@
 
 <body>
     <div class="container">
-        <div class="loader" id="loader" style="text-align: center;">Loading...</div>
+        <div class="loader" id="loader" style="text-align: center;" data-i18n="public.loading">Loading...</div>
 
         <div class="card" id="content" style="display: none;">
             <div id="expireDisplay"></div>
-            <h1>Send a Message</h1>
-            <p class="subtitle">Send an anonymous message to <strong id="recipientName">...</strong></p>
+            <h1 data-i18n="public.send_title">Send a Message</h1>
+            <p class="subtitle"><span data-i18n="public.subtitle_prefix">Send an anonymous message to</span> <strong
+                    id="recipientName">...</strong></p>
 
             <form id="messageForm">
                 <div class="form-group">
-                    <textarea id="message" rows="5" placeholder="Type your anonymous message here..."
-                        required></textarea>
+                    <textarea id="message" rows="5" data-i18n-placeholder="public.message_placeholder"
+                        placeholder="Type your anonymous message here..." required></textarea>
                 </div>
 
-                <button type="submit" class="btn" id="sendBtn">Send Message</button>
+                <button type="submit" class="btn" id="sendBtn" data-i18n="public.send_btn">Send Message</button>
             </form>
 
             <div id="success" style="display: none; text-align: center; margin-top: 2rem;">
-                <h2 style="color: var(--success); margin-bottom: 0.5rem;">Sent!</h2>
-                <p style="color: var(--text-muted);">Your message has been delivered anonymously.</p>
-                <button onclick="resetForm()" class="btn btn-secondary" style="margin-top: 1rem;">Send Another</button>
+                <h2 style="color: var(--success); margin-bottom: 0.5rem;" data-i18n="public.sent_title">Sent!</h2>
+                <p style="color: var(--text-muted);" data-i18n="public.sent_desc">Your message has been delivered
+                    anonymously.</p>
+                <button onclick="resetForm()" class="btn btn-secondary" style="margin-top: 1rem;"
+                    data-i18n="public.send_another">Send Another</button>
             </div>
 
             <div style="margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem; text-align: center;">
-                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">Want to receive anonymous
-                    messages?</p>
-                <a href="/"
-                    style="color: var(--primary); font-weight: 600; text-decoration: none; font-size: 0.9rem;">Get your
-                    own link</a>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;"
+                    data-i18n="public.get_own_link_text">Want to receive anonymous messages?</p>
+                <a href="/" style="color: var(--primary); font-weight: 600; text-decoration: none; font-size: 0.9rem;"
+                    data-i18n="public.get_own_link_btn">Get your own link</a>
             </div>
         </div>
     </div>
 
+    <script src="/static/i18n.js"></script>
     <script src="/static/app.js"></script>
     <script>
         const pathParts = window.location.pathname.split('/');
@@ -55,15 +58,21 @@
             try {
                 const response = await fetch(`${API_BASE}/public/${publicId}`);
                 if (response.status === 404 || response.status === 410) {
+                    const lang = localStorage.getItem('appLang') || 'en';
+                    // We can try to use translations here if available, but for simplicity just hardcode english fallback or simple text
+                    // Better to use data-i18n inside the innerHTML if we re-render
+
                     document.body.innerHTML = `
                         <div class="container">
                             <div class="card" style="text-align: center;">
-                                <h1>Link Expired</h1>
-                                <p class="subtitle">This session is no longer active.</p>
-                                <a href="/" class="btn">Go Home</a>
+                                <h1 data-i18n="public.link_expired">Link Expired</h1>
+                                <p class="subtitle" data-i18n="public.session_inactive">This session is no longer active.</p>
+                                <a href="/" class="btn" data-i18n="public.go_home">Go Home</a>
                             </div>
                         </div>
                     `;
+                    // Re-init language for the new content
+                    if (window.initLanguage) window.initLanguage();
                     return;
                 }
 
@@ -86,7 +95,11 @@
 
             const btn = document.getElementById('sendBtn');
             const originalText = btn.textContent;
-            btn.textContent = 'Sending...';
+
+            // Try to translate "Sending..."
+            const lang = localStorage.getItem('appLang') || 'en';
+            btn.textContent = window.translations ? (window.translations[lang]['public.sending'] || 'Sending...') : 'Sending...';
+
             btn.disabled = true;
 
             const content = document.getElementById('message').value;
