@@ -43,8 +43,6 @@ This project is built as a **monolithic application** and is designed to be easi
 ### recived messags – Generate Links
 ![recived messags Page](screenshots/recived_messags.png)
 
-### private – Generate Links
-![private Page](screenshots/private.png)
 
 
 
