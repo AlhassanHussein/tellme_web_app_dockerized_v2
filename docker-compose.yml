@@ -81,7 +81,6 @@ services:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
-      - ./frontend/build:/usr/share/caddy/frontend
 
     networks:
       - app_network
@@ -107,12 +106,7 @@ volumes:
   sqlite_data:
     driver: local
 
-  # SSL certificates from Let's Encrypt
-  # Shared between nginx and certbot
-  certbot_conf:
+  caddy_data:
     driver: local
-
-  # ACME challenge files for certificate issuance
-  # Shared between nginx and certbot
-  certbot_www:
+  caddy_config:
     driver: local
