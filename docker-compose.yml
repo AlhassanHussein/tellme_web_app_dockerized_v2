@@ -69,7 +69,8 @@ services:
   # Caddy (Reverse Proxy with SSL)
   # ========================================
   caddy:
-    image: caddy:2.9.0-alpine
+    image: caddy:2.10.2-alpine # Use a verified version
+
     container_name: tellme_caddy
     restart: unless-stopped
     ports:
