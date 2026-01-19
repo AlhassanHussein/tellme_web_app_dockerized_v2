@@ -3,3 +3,26 @@ __pycache__
 venv
 /backend/__pycache__
 
+# Environment and secrets
+.env
+
+# SSL certificates
+certbot/
+
+# Backups
+backups/
+
+# Docker
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+.Python

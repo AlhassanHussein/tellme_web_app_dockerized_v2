@@ -1,100 +1,279 @@
-# TellMe – Anonymous Temporary Messages Web App
+# TellMe - Anonymous Temporary Messages Platform
 
-TellMe is a full-stack web application that allows users to receive **anonymous messages** through **temporary links**.  
-Each generated session creates a **public link** to receive messages and a **private link** to view them.  
-All data is automatically deleted after a selected time period (6, 12, or 24 hours).
+A secure, anonymous messaging platform where users can receive temporary anonymous messages through unique shareable links.
 
-This project is built as a **monolithic application**   and is fully containerized for easy deployment and future scaling.
+## 🚀 Quick Start (Production)
 
----
+### Prerequisites
+- Ubuntu Server (20.04+)
+- Docker & Docker Compose
+- DuckDNS account
 
-## ✨ Features
+### Deploy in 4 Steps
 
-- Generate **temporary anonymous messaging links**
-- Public link to receive anonymous messages
-- Private link to view received messages
-- Message sender identity is completely hidden
-- Automatic expiration (6 / 12 / 24 hours)
-- Countdown timer before expiration
-- Auto-delete all data after expiration
-- Multi-language support:
-  - English
-  - Arabic (RTL)
-  - Spanish
-- Clean, modern, responsive UI
-- No authentication required
+```bash
+# 1. Configure environment
+cp .env.example .env
+nano .env  # Update DUCKDNS_TOKEN and SSL_EMAIL
 
----
+# 2. Build and start
+docker compose build
+docker compose up -d
 
-## 🖼️ Screenshots
+# 3. Setup SSL
+./scripts/init-letsencrypt.sh
 
-### public – Generate Links
-![public Page](screenshots/public.png)
+# 4. Access your site
+# https://saytruth.duckdns.org
+```
 
-### links – Generate Links
-![links Page](screenshots/links.png)
-
-### send messags – Generate Links
-![send messags Page](screenshots/send_message.png)
-
-###  sent – Generate Links
-![sent Page](screenshots/sent.png)
-
-### recived messags – Generate Links
-![recived messags Page](screenshots/recived_messags.png)
-
-
-
-
-> 📌 Screenshots are located in the `screenshots/` folder.
+**📖 Full deployment guide:** See [DEPLOYMENT.md](DEPLOYMENT.md)
 
 ---
 
-## 📦 Installation
+## 🏗️ Architecture
 
+### Production Setup
+- **Backend:** FastAPI (Python) with SQLite
+- **Frontend:** Static HTML/CSS/JS served by Nginx
+- **Reverse Proxy:** Nginx with SSL/HTTPS
+- **SSL:** Let's Encrypt (auto-renewal)
+- **DNS:** DuckDNS (dynamic IP updates)
 
-git clone https://github.com/AlhassanHussein/tellme_web_app_dockerized.git
-
-cd tellme_web_app_dockerized/
-
-docker build -t tellme-app .
-docker run -p 8000:8000 tellme-app
-
-
-## 🛠 Tech Stack
-
-- **Backend:** Python, FastAPI
-- **Frontend:** HTML, CSS, JavaScript
-- **Database:** SQLite
-- **Server:** Uvicorn
-- **Architecture:** Dockerized (Cloud-ready)
+### Containers
+```
+┌─────────────────────────────────────┐
+│  Nginx Reverse Proxy (SSL)         │  :80, :443
+│  ├─ /api/* → Backend                │
+│  └─ /* → Frontend                   │
+└─────────────────────────────────────┘
+         │              │
+    ┌────┴────┐    ┌────┴────┐
+    │ Backend │    │Frontend │
+    │ FastAPI │    │  Nginx  │
+    └────┬────┘    └─────────┘
+         │
+    ┌────┴────┐
+    │ SQLite  │
+    │ Volume  │
+    └─────────┘
+```
 
 ---
 
 ## 📁 Project Structure
 
+```
+tellme/
+├── backend/              # FastAPI application
+│   ├── Dockerfile       # Backend container
+│   ├── main.py          # FastAPI app
+│   ├── database.py      # Database config
+│   ├── models.py        # SQLModel models
+│   └── routers/         # API routes
+├── frontend/            # Static web files
+│   ├── Dockerfile       # Frontend container
+│   ├── index.html       # Main page
+│   ├── public.html      # Public message page
+│   ├── private.html     # Private inbox page
+│   ├── app.js           # Frontend logic
+│   ├── i18n.js          # Multi-language support
+│   └── style.css        # Styling
+├── nginx/
+│   └── nginx.conf       # Reverse proxy config
+├── scripts/
+│   ├── init-letsencrypt.sh  # SSL setup
+│   ├── backup-db.sh         # Database backup
+│   └── restore-db.sh        # Database restore
+├── docker-compose.yml   # Service orchestration
+├── .env                 # Environment variables
+└── DEPLOYMENT.md        # Full deployment guide
+```
 
-## Project Structure
+---
 
-```text
-.
-├── backend/                # FastAPI Server Logic
-│   ├── main.py             # Application entry point
-│   ├── database.py         # Database connection configuration
-│   ├── models.py           # SQLAlchemy/SQLModel data definitions
-│   ├── scheduler.py        # Background tasks and periodic jobs
-│   └── routers/            
-│       └── api.py          # API route definitions
-├── frontend/               # Web Interface
-│   ├── index.html          # Main landing page
-│   ├── public.html         # Publicly accessible view
-│   ├── private.html        # Authenticated user view
-│   ├── app.js              # Frontend logic and API integration
-│   ├── i18n.js             # Internationalization/Translations
-│   └── style.css           # Global styles
-├── database.db             # SQLite database file
-├── requirements.txt        # Python dependencies
-├── README.md         
-├── Dockerfile              # Docker configuration
-└── .dockerignore           # Docker ignore file
+## 🔧 Features
 
+### Core Functionality
+- ✅ Create temporary anonymous message sessions (6h, 12h, 24h)
+- ✅ Unique public/private link pairs
+- ✅ Anonymous message submission
+- ✅ Private inbox for session owners
+- ✅ Automatic session expiration
+- ✅ Multi-language support (English, Arabic, Spanish)
+
+### Production Features
+- ✅ SSL/HTTPS with Let's Encrypt
+- ✅ DuckDNS dynamic DNS integration
+- ✅ Persistent data with Docker volumes
+- ✅ Automated SSL certificate renewal
+- ✅ Database backup/restore scripts
+- ✅ Health checks and auto-restart
+- ✅ Security headers and best practices
+
+---
+
+## 🛠️ Development
+
+### Local Development
+
+```bash
+# Backend
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+uvicorn backend.main:app --reload
+
+# Frontend
+cd frontend
+# Open index.html in browser or use a local server
+python -m http.server 8080
+```
+
+### Environment Variables
+
+```bash
+# Production (.env)
+DOMAIN_NAME=saytruth.duckdns.org
+DUCKDNS_SUBDOMAIN=saytruth
+DUCKDNS_TOKEN=your-token
+DATABASE_PATH=/app/data/database.db
+SSL_EMAIL=your-email@example.com
+```
+
+---
+
+## 📊 Database
+
+### Current: SQLite
+- Simple, file-based database
+- Perfect for small to medium traffic
+- Easy backups with provided scripts
+- Persistent via Docker volumes
+
+### Future: PostgreSQL
+Easy migration path when scaling:
+- Update `docker-compose.yml`
+- Update `backend/database.py`
+- Run migration script
+
+---
+
+## 🔐 Security
+
+- **SSL/HTTPS:** All traffic encrypted
+- **Non-root containers:** Security best practice
+- **Security headers:** HSTS, X-Frame-Options, etc.
+- **Network isolation:** Internal Docker network
+- **Secret management:** Environment variables
+
+---
+
+## 📦 Maintenance
+
+### Backup Database
+```bash
+./scripts/backup-db.sh
+```
+
+### Restore Database
+```bash
+./scripts/restore-db.sh backups/database_backup_YYYYMMDD_HHMMSS.db
+```
+
+### View Logs
+```bash
+docker compose logs -f
+docker compose logs backend
+docker compose logs nginx
+```
+
+### Update Application
+```bash
+git pull
+docker compose up -d --build
+```
+
+---
+
+## 🐛 Troubleshooting
+
+See [DEPLOYMENT.md](DEPLOYMENT.md#troubleshooting) for detailed troubleshooting guide.
+
+Quick checks:
+```bash
+# Check all containers
+docker compose ps
+
+# Check logs
+docker compose logs -f
+
+# Restart service
+docker compose restart backend
+
+# Verify SSL
+curl -I https://saytruth.duckdns.org
+```
+
+---
+
+## 📚 Documentation
+
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Complete deployment guide
+- **[implementation_plan.md](.gemini/...)** - Technical implementation details
+- **[walkthrough.md](.gemini/...)** - Implementation walkthrough
+
+---
+
+## 🌐 Multi-Language Support
+
+The platform supports:
+- 🇬🇧 English (default)
+- 🇸🇦 Arabic (RTL support)
+- 🇪🇸 Spanish
+
+Language switcher available on all pages.
+
+---
+
+## 🚀 Deployment Checklist
+
+- [ ] Docker and Docker Compose installed
+- [ ] DuckDNS account and domain configured
+- [ ] `.env` file configured with actual values
+- [ ] Firewall ports 80 and 443 open
+- [ ] Services started: `docker compose up -d`
+- [ ] SSL certificates obtained: `./scripts/init-letsencrypt.sh`
+- [ ] HTTPS access verified
+- [ ] Backup script tested
+- [ ] Automated backups configured (optional)
+
+---
+
+## 📝 License
+
+This project is for educational and personal use.
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please ensure:
+- Code follows existing style
+- Docker builds successfully
+- Documentation updated
+- Security best practices followed
+
+---
+
+## 📧 Support
+
+For issues:
+1. Check logs: `docker compose logs`
+2. Review [DEPLOYMENT.md](DEPLOYMENT.md)
+3. Check Docker documentation
+
+---
+
+**Built with ❤️ using FastAPI, Docker, and Nginx**
