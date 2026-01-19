@@ -40,36 +40,21 @@ if [ -d "certbot/conf/live/$DOMAIN_NAME" ]; then
     fi
 fi
 
-echo "Step 1: Starting nginx temporarily for ACME challenge..."
+echo "Step 1: Ensuring HTTP-only nginx is running for ACME challenge..."
 
-# Create temporary nginx config for HTTP only (for initial certificate)
-cat > nginx/nginx.conf.temp << EOF
-server {
-    listen 80;
-    server_name $DOMAIN_NAME;
-
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
-
-    location / {
-        return 200 'ACME challenge server running';
-        add_header Content-Type text/plain;
-    }
-}
-EOF
-
-# Backup current nginx config
-if [ -f "nginx/nginx.conf" ]; then
-    cp nginx/nginx.conf nginx/nginx.conf.backup
+# Make sure we're using HTTP-only config
+if [ ! -f "nginx/nginx-http-only.conf" ]; then
+    echo "Error: nginx-http-only.conf not found!"
+    exit 1
 fi
 
-# Use temporary config
-cp nginx/nginx.conf.temp nginx/nginx.conf
+# Use HTTP-only config temporarily
+cp nginx/nginx.conf nginx/nginx.conf.backup 2>/dev/null || true
+cp nginx/nginx-http-only.conf nginx/nginx.conf
 
-# Start nginx temporarily
-echo "Starting nginx for ACME challenge..."
-docker-compose up -d nginx
+# Restart nginx with HTTP-only config
+echo "Restarting nginx..."
+docker compose restart nginx || docker compose up -d nginx
 
 sleep 5
 
@@ -79,7 +64,7 @@ echo "This may take a minute..."
 echo ""
 
 # Request certificate
-docker-compose run --rm certbot certonly \
+docker compose run --rm certbot certonly \
     --webroot \
     --webroot-path=/var/www/certbot \
     --email $SSL_EMAIL \
@@ -93,16 +78,17 @@ if [ $? -eq 0 ]; then
     echo "✓ SSL certificate obtained successfully!"
     echo ""
     
-    # Restore production nginx config
-    if [ -f "nginx/nginx.conf.backup" ]; then
-        mv nginx/nginx.conf.backup nginx/nginx.conf
+    # Restore production nginx config with SSL
+    if [ -f "nginx/nginx-ssl.conf" ]; then
+        echo "Step 3: Switching to SSL-enabled nginx configuration..."
+        cp nginx/nginx-ssl.conf nginx/nginx.conf
+    else
+        echo "Warning: nginx-ssl.conf not found, keeping current config"
     fi
     
-    # Remove temporary config
-    rm -f nginx/nginx.conf.temp
-    
-    echo "Step 3: Restarting nginx with SSL configuration..."
-    docker-compose restart nginx
+    # Restart nginx with SSL config
+    echo "Restarting nginx with SSL..."
+    docker compose restart nginx
     
     echo ""
     echo "=== Setup Complete! ==="
@@ -124,6 +110,7 @@ else
     # Restore backup if exists
     if [ -f "nginx/nginx.conf.backup" ]; then
         mv nginx/nginx.conf.backup nginx/nginx.conf
+        docker compose restart nginx
     fi
     
     exit 1
