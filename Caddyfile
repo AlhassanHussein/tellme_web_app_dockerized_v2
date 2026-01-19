@@ -1,0 +1,11 @@
+{
+    email python.hassan@gmail.com  # for Let's Encrypt notifications
+}
+
+{$DOMAIN_NAME} {
+    # Reverse proxy API to backend
+    reverse_proxy /api/* backend:8000
+
+    # Reverse proxy everything else to frontend Nginx
+    reverse_proxy /* frontend:80
+}
